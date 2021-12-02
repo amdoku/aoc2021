@@ -1,25 +1,50 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <numeric>
 #include <vector>
 
 #include <utilities.hpp>
 
 struct Submarine {
-	uint64_t depth{};
+	int64_t depth{};
 	int64_t horizontal{};
 };
 
-void handle(Submarine & sub, std::string const & input) {
-	if (std::starts_with(input, "down")) {
-		// sub.depth += value;
-	} else if (std::starts_with(input, "up")) {
-		// sub.depth -= value;
-	} else if (std::starts_with(input, "forward")) {
-		// sub.horizontal += value;
-	} else {
-		std::cout << "Unkown command :'" << input << "'\n";
+enum class Direction {
+	UP,
+	DOWN,
+	FORWARD
+};
+
+struct SubCommand {
+	Direction dir;
+	int64_t value;
+};
+
+std::istream & operator>>(std::istream & in, SubCommand &sub) {
+	std::string input;
+	in >> input >> sub.value;
+
+	if (input == "down") {
+		sub.dir = Direction::DOWN;
+	} else if (input == "up") {
+		sub.dir = Direction::UP;
+	} else if (input == "forward") {
+		sub.dir = Direction::FORWARD;
+	}
+	return in;
+}
+
+void handle(Submarine & sub, SubCommand const & input) {
+	switch(input.dir) {
+		case Direction::DOWN:
+			sub.depth += input.value;
+			break;
+		case Direction::UP:
+			sub.depth -= input.value;
+			break;
+		case Direction::FORWARD:
+			sub.horizontal += input.value;
 	}
 }
 
@@ -33,11 +58,11 @@ int main(int argc, char ** argv) {
 		std::cout << "Error opening file. Exiting\n";
 		return -1;
 	}
-	std::istream_iterator<util::read_sep<std::string, '\n'>> start{inFile};
+	std::istream_iterator<util::read_sep<SubCommand, '\n'>> start{inFile};
 	decltype(start) end{};
 
 	Submarine sub{};
-	std::for_each(start, end, [&sub](std::string const & input) {
+	std::for_each(start, end, [&sub](SubCommand const & input) {
 		handle(sub, input);
 	});
 
