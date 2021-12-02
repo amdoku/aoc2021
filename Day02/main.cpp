@@ -8,6 +8,7 @@
 struct Submarine {
 	int64_t depth{};
 	int64_t horizontal{};
+	int64_t aim{};
 };
 
 enum class Direction {
@@ -35,7 +36,7 @@ std::istream & operator>>(std::istream & in, SubCommand &sub) {
 	return in;
 }
 
-void handle(Submarine & sub, SubCommand const & input) {
+void handleSol1(Submarine & sub, SubCommand const & input) {
 	switch(input.dir) {
 		case Direction::DOWN:
 			sub.depth += input.value;
@@ -45,6 +46,21 @@ void handle(Submarine & sub, SubCommand const & input) {
 			break;
 		case Direction::FORWARD:
 			sub.horizontal += input.value;
+	}
+}
+
+void handleSol2(Submarine & sub, SubCommand const & input) {
+	switch(input.dir) {
+		case Direction::DOWN:
+			sub.aim += input.value;
+			break;
+		case Direction::UP:
+			sub.aim -= input.value;
+			break;
+		case Direction::FORWARD:
+			sub.horizontal += input.value;
+			sub.depth += (sub.aim * input.value);
+			break;
 	}
 }
 
@@ -61,12 +77,15 @@ int main(int argc, char ** argv) {
 	std::istream_iterator<util::read_sep<SubCommand, '\n'>> start{inFile};
 	decltype(start) end{};
 
-	Submarine sub{};
-	std::for_each(start, end, [&sub](SubCommand const & input) {
-		handle(sub, input);
+	Submarine sub1{};
+	Submarine sub2{};
+	std::for_each(start, end, [&sub1, &sub2](SubCommand const & input) {
+		handleSol1(sub1, input);
+		handleSol2(sub2, input);
 	});
 
-	std::cout << "Solution 1: " << sub.depth * sub.horizontal;
+	std::cout << "Solution 1: " << sub1.depth * sub1.horizontal << '\n';
+	std::cout << "Solution 2: " << sub2.depth * sub2.horizontal << '\n';
 
 	return 0;
 }
