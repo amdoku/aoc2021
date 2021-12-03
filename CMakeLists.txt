@@ -20,4 +20,5 @@ target_include_directories(utility INTERFACE includes)
 
 add_subdirectory("Day01")
 add_subdirectory("Day02")
+add_subdirectory("Day03")
 
