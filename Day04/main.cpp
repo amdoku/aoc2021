@@ -11,6 +11,7 @@
 class BingoCard {
 	std::array<int, 25> values{0};
 	std::bitset<25> ticked{};
+	bool isDone{false};
 public:
 	BingoCard() = default;
 	explicit BingoCard(std::array<int, 25> val) noexcept : values(val) {
@@ -23,6 +24,7 @@ public:
 	BingoCard& operator=(BingoCard &&) noexcept = default;
 
 	[[nodiscard]] bool accept(int number) noexcept {
+		if (isDone) return false;
 		auto begin{std::cbegin(values)};
 		auto end{std::cend(values)};
 		auto needle = std::find(begin, end, number);
@@ -30,7 +32,7 @@ public:
 			ticked.set(static_cast<size_t>(std::distance(begin, needle)));
 		}
 
-		return hasRow() || hasCol();
+		return (isDone = hasRow() || hasCol());
 	}
 
 	[[nodiscard]] int sumOfUnmarkedNumbers() const noexcept {
@@ -97,10 +99,23 @@ int main(int argc, char ** argv) {
 	std::vector<int> const inputNumbers{drawnNumbers, decltype(drawnNumbers){}};
 
 	std::istream_iterator<util::read_sep<BingoCard, '\n'>> start{inFile};
-	std::vector<BingoCard> const cards{start, decltype(start){}};
+	std::vector<BingoCard> cards{start, decltype(start){}};
 
-	std::cout << "Solution 1: " << 0 << '\n';
-	std::cout << "Solution 2: " << 0 << '\n';
+	std::optional<int> sol1{};
+	std::optional<int> sol2{};
+	for(auto number = std::cbegin(inputNumbers); number < std::cend(inputNumbers); number++) {
+		for(auto card = std::begin(cards); card < std::end(cards); card++) {
+			if (card->accept(*number)) {
+				if (!sol1.has_value()) {
+					sol1 = card->sumOfUnmarkedNumbers() * (*number);
+				}
+				sol2 = card->sumOfUnmarkedNumbers() * (*number);
+			}
+		}
+	}
+
+	std::cout << "Solution 1: " << sol1.value_or(-1) << '\n';
+	std::cout << "Solution 2: " << sol2.value_or(-1) << '\n';
 
 	return 0;
 }
