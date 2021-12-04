@@ -7,6 +7,8 @@
 
 #include <istream>
 #include <iterator>
+#include <ranges>
+#include <limits>
 
 namespace util {
 
@@ -26,6 +28,19 @@ namespace util {
 		else //if the next character is anything else
 			in.clear(); //clear the EOF state, read was successful
 		return in; //return
+	}
+
+	template<size_t N>
+	consteval size_t generate_mask() {
+		static_assert(std::numeric_limits<size_t>::digits >= N, "paranoia");
+		static_assert(N >= 1,"paranoia");
+
+		size_t reti{1};
+		for(std::weakly_incrementable auto idx : std::views::iota(1u, N)) {
+			reti |= (1 << idx);
+		}
+
+		return reti;
 	}
 }
 #endif //AOS2020_SAMPLE_UTILITIES_HPP
